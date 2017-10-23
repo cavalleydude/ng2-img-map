@@ -210,6 +210,7 @@ export class ImgMapComponent {
     const context = canvas.getContext('2d');
     context.clearRect(0, 0, width, height);
     this.setPixels();
+    /*
     this.pixels.forEach((pixel, index) => {
       if (this.markerActive === index) {
         this.drawMarker(pixel, 'active');
@@ -218,7 +219,24 @@ export class ImgMapComponent {
       } else {
         this.drawMarker(pixel);
       }
-    });
+    });*/
+
+    // Let assume that we draw a line starting at the first pixel, to the next, to the next, and so on...
+    // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
+    // for instance, A->B, then B->C, then C->A
+    if ( this.pixels.length > 2 ) {
+        context.beginPath();
+        var pointAx = this.pixels[0][0];
+        var pointAy = this.pixels[0][1];
+        context.moveTo(pointAx, pointAy);
+        for ( var x = 1; x < this.pixels.length; x++ ) {
+            context.lineTo(this.pixels[x][0],this.pixels[x][1]);
+            context.stroke();
+        }
+        context.lineTo(pointAx, pointAy);
+        context.stroke();
+    }
+
   }
 
   onClick(event: MouseEvent): void {
