@@ -85,6 +85,12 @@ export class ImgMapComponent {
      * Boolean whether to draw the final line on last mark to first mark to close the path, defaults to false
      */
     @Input()
+    lineColor: string = 'rgba(0, 0, 255, 0.4)';
+
+    /**
+     * Boolean whether to draw the final line on last mark to first mark to close the path, defaults to false
+     */
+    @Input()
     fillColorForClosedPath: string = 'rgba(255, 0, 0, 0.4)';
 
     /**
@@ -283,6 +289,7 @@ export class ImgMapComponent {
         if ( this.pixels.length > 2 ) {
             context.imageSmoothingEnabled = true;
             context.beginPath();
+            context.strokeStyle = this.lineColor;
             var pointAx = this.pixels[0][0];
             var pointAy = this.pixels[0][1];
             context.moveTo(pointAx, pointAy);
@@ -299,7 +306,6 @@ export class ImgMapComponent {
                 context.fillStyle = this.fillColorForClosedPath;
                 context.fill();
             }
-
             //context.isPointInPath(0,1);
         }
 
