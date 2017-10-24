@@ -69,7 +69,13 @@ export class ImgMapComponent {
   @Input()
   src: string;
 
-  /**
+    /**
+     * Boolean whether to draw lines between markers, defaults to false
+     */
+    @Input()
+    lineDrawingMode: boolean = false;
+
+    /**
    * On change event.
    */
   @Output('change')
@@ -199,47 +205,70 @@ export class ImgMapComponent {
    * Clears the canvas and draws the markers.
    */
   draw(): void {
-    const canvas: HTMLCanvasElement = this.canvas.nativeElement;
-    const container: HTMLDivElement = this.container.nativeElement;
-    const image: HTMLImageElement = this.image.nativeElement;
-    const height = image.clientHeight;
-    const width = image.clientWidth;
-    this.renderer.setElementAttribute(canvas, 'height', `${height}`);
-    this.renderer.setElementAttribute(canvas, 'width', `${width}`);
-    this.renderer.setElementStyle(container, 'height', `${height}px`);
-    const context = canvas.getContext('2d');
-    context.clearRect(0, 0, width, height);
-    this.setPixels();
-    /*
-    this.pixels.forEach((pixel, index) => {
-      if (this.markerActive === index) {
-        this.drawMarker(pixel, 'active');
-      } else if (this.markerHover === index) {
-        this.drawMarker(pixel, 'hover');
+      if( this.lineDrawingMode ) {
+          this.drawLines();
       } else {
-        this.drawMarker(pixel);
+          const canvas: HTMLCanvasElement = this.canvas.nativeElement;
+          const container: HTMLDivElement = this.container.nativeElement;
+          const image: HTMLImageElement = this.image.nativeElement;
+          const height = image.clientHeight;
+          const width = image.clientWidth;
+          this.renderer.setElementAttribute(canvas, 'height', `${height}`);
+          this.renderer.setElementAttribute(canvas, 'width', `${width}`);
+          this.renderer.setElementStyle(container, 'height', `${height}px`);
+          const context = canvas.getContext('2d');
+          context.clearRect(0, 0, width, height);
+          this.setPixels();
+          this.pixels.forEach((pixel, index) => {
+              if (this.markerActive === index) {
+                  this.drawMarker(pixel, 'active');
+              } else if (this.markerHover === index) {
+                  this.drawMarker(pixel, 'hover');
+              } else {
+                  this.drawMarker(pixel);
+              }
+          });
       }
-    });*/
-
-    // Let assume that we draw a line starting at the first pixel, to the next, to the next, and so on...
-    // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
-    // for instance, A->B, then B->C, then C->A
-    if ( this.pixels.length > 2 ) {
-        context.beginPath();
-        var pointAx = this.pixels[0][0];
-        var pointAy = this.pixels[0][1];
-        context.moveTo(pointAx, pointAy);
-        for ( var x = 1; x < this.pixels.length; x++ ) {
-            context.lineTo(this.pixels[x][0],this.pixels[x][1]);
-            context.stroke();
-        }
-        context.lineTo(pointAx, pointAy);
-        context.stroke();
-    }
-
   }
 
-  onClick(event: MouseEvent): void {
+    /**
+     * Clears the canvas and draws a line from each marker, then from the last marker back to first marker.
+     */
+    drawLines(): void {
+        const canvas: HTMLCanvasElement = this.canvas.nativeElement;
+        const container: HTMLDivElement = this.container.nativeElement;
+        const image: HTMLImageElement = this.image.nativeElement;
+        const height = image.clientHeight;
+        const width = image.clientWidth;
+        this.renderer.setElementAttribute(canvas, 'height', `${height}`);
+        this.renderer.setElementAttribute(canvas, 'width', `${width}`);
+        this.renderer.setElementStyle(container, 'height', `${height}px`);
+        const context = canvas.getContext('2d');
+        context.clearRect(0, 0, width, height);
+        this.setPixels();
+        // Let assume that we draw a line starting at the first pixel, to the next, to the next, and so on...
+        // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
+        // for instance, A->B, then B->C, then C->A
+        if ( this.pixels.length > 2 ) {
+            context.beginPath();
+            var pointAx = this.pixels[0][0];
+            var pointAy = this.pixels[0][1];
+            context.moveTo(pointAx, pointAy);
+            for ( var x = 1; x < this.pixels.length; x++ ) {
+                context.lineTo(this.pixels[x][0],this.pixels[x][1]);
+                context.stroke();
+            }
+            context.lineTo(pointAx, pointAy);
+            context.stroke();
+            // Finally, fill the context
+            context.fillStyle = 'rgba(0, 0, 255, 0.4)';
+            context.fill();
+
+        }
+
+    }
+
+    onClick(event: MouseEvent): void {
     const cursor = this.cursor(event);
     var active = false;
     if (this.changeEvent.observers.length) {
