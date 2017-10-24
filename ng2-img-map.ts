@@ -2,6 +2,11 @@ import {
   Component, ElementRef, EventEmitter, Input, Output, Renderer, ViewChild
 } from '@angular/core';
 
+class ImgShape {
+    marks: number[][] = [];
+    pixels: number[][] = [];
+}
+
 @Component({
   selector: 'img-map',
   styles: [
@@ -30,6 +35,10 @@ import {
   `
 })
 export class ImgMapComponent {
+
+
+
+  private shapeArray: ImgShape[] = [];
 
   /**
    * Canvas element.
@@ -236,6 +245,15 @@ export class ImgMapComponent {
     this.markers.forEach(marker => {
       this.pixels.push(this.markerToPixel(marker));
     });
+
+    // Adjust pixels in all shapes
+      this.shapeArray.forEach(shape => {
+          shape.pixels = [];
+          shape.marks.forEach(marker => {
+              shape.pixels.push(this.markerToPixel(marker));
+          });
+      });
+
   }
 
   /**
@@ -268,6 +286,19 @@ export class ImgMapComponent {
       }
   }
 
+  createShape(marks: number[][]) {
+      var shape = new ImgShape();
+      shape.marks = marks;
+      marks.forEach(mark => {
+          shape.pixels = [];
+          marks.forEach(marker => {
+              shape.pixels.push(this.markerToPixel(marker));
+          });
+      });
+      this.shapeArray.push(shape);
+      this.draw();
+  }
+
     /**
      * Clears the canvas and draws a line from each marker, then from the last marker back to first marker.
      */
@@ -286,28 +317,31 @@ export class ImgMapComponent {
         // Let assume that we draw a line starting at the first pixel, to the next, to the next, and so on...
         // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
         // for instance, A->B, then B->C, then C->A
-        if ( this.pixels.length > 2 ) {
-            context.imageSmoothingEnabled = true;
-            context.beginPath();
-            context.strokeStyle = this.lineColor;
-            var pointAx = this.pixels[0][0];
-            var pointAy = this.pixels[0][1];
-            context.moveTo(pointAx, pointAy);
-            for ( var x = 1; x < this.pixels.length; x++ ) {
-                context.lineTo(this.pixels[x][0],this.pixels[x][1]);
-                context.stroke();
+        this.shapeArray.forEach(shape => {
+            if ( shape.pixels.length > 2 ) {
+                context.imageSmoothingEnabled = true;
+                context.beginPath();
+                context.strokeStyle = this.lineColor;
+                var pointAx = shape.pixels[0][0];
+                var pointAy = shape.pixels[0][1];
+                context.moveTo(pointAx, pointAy);
+                for ( var x = 1; x < shape.pixels.length; x++ ) {
+                    context.lineTo(shape.pixels[x][0],shape.pixels[x][1]);
+                    context.stroke();
+                }
+                if( this.drawLineToClosePath ) {
+                    context.lineTo(pointAx, pointAy);
+                    context.stroke();
+                }
+                // Finally, fill the context
+                if( this.fillClosedPath ) {
+                    context.fillStyle = this.fillColorForClosedPath;
+                    context.fill();
+                }
+                //context.isPointInPath(0,1);
             }
-            if( this.drawLineToClosePath ) {
-                context.lineTo(pointAx, pointAy);
-                context.stroke();
-            }
-            // Finally, fill the context
-            if( this.fillClosedPath ) {
-                context.fillStyle = this.fillColorForClosedPath;
-                context.fill();
-            }
-            //context.isPointInPath(0,1);
-        }
+        });
+
 
     }
 
@@ -374,3 +408,4 @@ export class ImgMapComponent {
   }
 
 }
+
