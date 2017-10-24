@@ -76,6 +76,12 @@ export class ImgMapComponent {
     lineDrawingMode: boolean = false;
 
     /**
+     * Boolean whether to add new mark on click, defaults to true
+     */
+    @Input()
+    addMarkOnClickMode: boolean = true;
+
+    /**
    * On change event.
    */
   @Output('change')
@@ -185,10 +191,16 @@ export class ImgMapComponent {
    * Sets the new marker position.
    */
   private mark(pixel: number[]): void {
-    this.markerActive = this.markers.length;
-    this.markers.push(this.pixelToMarker(pixel));
-    this.draw();
-    this.markEvent.emit(this.markers[this.markerActive]);
+      if( this.addMarkOnClickMode ) {
+          this.markerActive = this.markers.length;
+          this.markers.push(this.pixelToMarker(pixel));
+          this.draw();
+          this.markEvent.emit(this.markers[this.markerActive]);
+      } else {
+          // We don't add a mark because addMarkOnClick is not enabled.
+          // Later, we will add logic to check shapes for hit detection.
+
+      }
   }
 
   /**
@@ -250,6 +262,7 @@ export class ImgMapComponent {
         // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
         // for instance, A->B, then B->C, then C->A
         if ( this.pixels.length > 2 ) {
+            context.imageSmoothingEnabled = true;
             context.beginPath();
             var pointAx = this.pixels[0][0];
             var pointAy = this.pixels[0][1];
@@ -264,11 +277,12 @@ export class ImgMapComponent {
             context.fillStyle = 'rgba(0, 0, 255, 0.4)';
             context.fill();
 
+            //context.isPointInPath(0,1);
         }
 
     }
 
-    onClick(event: MouseEvent): void {
+  onClick(event: MouseEvent): void {
     const cursor = this.cursor(event);
     var active = false;
     if (this.changeEvent.observers.length) {
