@@ -23,8 +23,12 @@ export declare class ImgMapComponent {
      */
     src: string;
     /**
-     * On change event.
+     * Boolean whether to draw lines between markers, defaults to false
      */
+    lineDrawingMode: boolean;
+    /**
+   * On change event.
+   */
     changeEvent: EventEmitter<number[]>;
     /**
      * On mark event.
@@ -80,6 +84,10 @@ export declare class ImgMapComponent {
      * Clears the canvas and draws the markers.
      */
     draw(): void;
+    /**
+     * Clears the canvas and draws a line from each marker, then from the last marker back to first marker.
+     */
+    drawLines(): void;
     onClick(event: MouseEvent): void;
     onLoad(event: UIEvent): void;
     onMousemove(event: MouseEvent): void;
