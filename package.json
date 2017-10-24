@@ -33,7 +33,7 @@
   "devDependencies": {
     "es6-shim": "^0.35.1",
     "typescript": "^1.8.10",
-    "typings": "^1.3.2"
+    "typings": "~2.3.3"
   },
   "peerDependencies": {
     "@angular/core": "^4.4.4"
