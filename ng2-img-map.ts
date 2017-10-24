@@ -286,7 +286,7 @@ export class ImgMapComponent {
       }
   }
 
-  createShape(marks: number[][]) {
+  createShape(marks: number[][]): void {
       var shape = new ImgShape();
       shape.marks = marks;
       marks.forEach(mark => {
