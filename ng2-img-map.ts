@@ -296,7 +296,7 @@ export class ImgMapComponent {
             }
             // Finally, fill the context
             if( this.fillClosedPath ) {
-                context.fillStyle = this.fillColorForClosedPath ? this.fillColorForClosedPath : 'rgba(0, 0, 255, 0.4)';
+                context.fillStyle = this.fillColorForClosedPath;
                 context.fill();
             }
 
