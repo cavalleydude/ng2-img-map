@@ -73,13 +73,32 @@ export class ImgMapComponent {
      * Boolean whether to draw lines between markers, defaults to false
      */
     @Input()
-    lineDrawingMode: boolean = false;
+    drawLinesBetweenMarks: boolean = false;
+
+    /**
+     * Boolean whether to draw the final line on last mark to first mark to close the path, defaults to false
+     */
+    @Input()
+    drawLineToClosePath: boolean = false;
+
+    /**
+     * Boolean whether to draw the final line on last mark to first mark to close the path, defaults to false
+     */
+    @Input()
+    fillColorForClosedPath: string = 'rgba(255, 0, 0, 0.4)';
+
+    /**
+     * Boolean whether to draw the final line on last mark to first mark to close the path, defaults to false
+     */
+    @Input()
+    fillClosedPath: boolean = false;
+
 
     /**
      * Boolean whether to add new mark on click, defaults to true
      */
     @Input()
-    addMarkOnClickMode: boolean = true;
+    addMarkOnClick: boolean = true;
 
     /**
    * On change event.
@@ -191,7 +210,7 @@ export class ImgMapComponent {
    * Sets the new marker position.
    */
   private mark(pixel: number[]): void {
-      if( this.addMarkOnClickMode ) {
+      if( this.addMarkOnClick ) {
           this.markerActive = this.markers.length;
           this.markers.push(this.pixelToMarker(pixel));
           this.draw();
@@ -217,7 +236,7 @@ export class ImgMapComponent {
    * Clears the canvas and draws the markers.
    */
   draw(): void {
-      if( this.lineDrawingMode ) {
+      if( this.drawLinesBetweenMarks ) {
           this.drawLines();
       } else {
           const canvas: HTMLCanvasElement = this.canvas.nativeElement;
@@ -271,11 +290,15 @@ export class ImgMapComponent {
                 context.lineTo(this.pixels[x][0],this.pixels[x][1]);
                 context.stroke();
             }
-            context.lineTo(pointAx, pointAy);
-            context.stroke();
+            if( this.drawLineToClosePath ) {
+                context.lineTo(pointAx, pointAy);
+                context.stroke();
+            }
             // Finally, fill the context
-            context.fillStyle = 'rgba(0, 0, 255, 0.4)';
-            context.fill();
+            if( this.fillClosedPath ) {
+                context.fillStyle = this.fillColorForClosedPath ? this.fillColorForClosedPath : 'rgba(0, 0, 255, 0.4)';
+                context.fill();
+            }
 
             //context.isPointInPath(0,1);
         }
