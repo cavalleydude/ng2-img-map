@@ -3,6 +3,10 @@ import {
 } from '@angular/core';
 
 class ImgShape {
+    uid: number;
+    fill: boolean = false;
+    fillColor: string = 'rgba(255, 0, 0, 0.4)';
+    lineColor: string = 'rgba(0, 255, 0, 0.4)';
     marks: number[][] = [];
     pixels: number[][] = [];
 }
@@ -231,9 +235,12 @@ export class ImgMapComponent {
           this.draw();
           this.markEvent.emit(this.markers[this.markerActive]);
       } else {
-          // We don't add a mark because addMarkOnClick is not enabled.
-          // Later, we will add logic to check shapes for hit detection.
-
+          // We will call drawLines with the optional pixel parameter
+          // which is the location of the cursor down coordinate. The
+          // drawLines will check if any of the shapes are hit by this
+          // coordinate and notify the calling app, if listening to
+          // (mark) events.
+          this.drawLines(pixel);
       }
   }
 
@@ -286,8 +293,12 @@ export class ImgMapComponent {
       }
   }
 
-  createShape(marks: number[][]): void {
+  createShape(shapeUid: number, fill: boolean, fillColor: string, lineColor: string, marks: number[][]): void {
       var shape = new ImgShape();
+      shape.uid = shapeUid;
+      shape.fill = fill;
+      shape.fillColor = fillColor;
+      shape.lineColor = lineColor;
       shape.marks = marks;
       marks.forEach(mark => {
           shape.pixels = [];
@@ -296,13 +307,12 @@ export class ImgMapComponent {
           });
       });
       this.shapeArray.push(shape);
-      this.draw();
   }
 
     /**
      * Clears the canvas and draws a line from each marker, then from the last marker back to first marker.
      */
-    drawLines(): void {
+    drawLines( coordinate?: number[] ): void {
         const canvas: HTMLCanvasElement = this.canvas.nativeElement;
         const container: HTMLDivElement = this.container.nativeElement;
         const image: HTMLImageElement = this.image.nativeElement;
@@ -317,6 +327,8 @@ export class ImgMapComponent {
         // Let assume that we draw a line starting at the first pixel, to the next, to the next, and so on...
         // and a line from the last one to the first one to complete the polygon. There MUST be at least 3 points.
         // for instance, A->B, then B->C, then C->A
+        var shapeUids: number[] = [];
+
         this.shapeArray.forEach(shape => {
             if ( shape.pixels.length > 2 ) {
                 context.imageSmoothingEnabled = true;
@@ -327,21 +339,30 @@ export class ImgMapComponent {
                 context.moveTo(pointAx, pointAy);
                 for ( var x = 1; x < shape.pixels.length; x++ ) {
                     context.lineTo(shape.pixels[x][0],shape.pixels[x][1]);
-                    context.stroke();
+                    //context.stroke();
                 }
                 if( this.drawLineToClosePath ) {
                     context.lineTo(pointAx, pointAy);
-                    context.stroke();
+                    //context.stroke();
                 }
                 // Finally, fill the context
                 if( this.fillClosedPath ) {
                     context.fillStyle = this.fillColorForClosedPath;
                     context.fill();
                 }
-                //context.isPointInPath(0,1);
+                context.stroke();
+
+                if ( coordinate ) {
+                    if ( context.isPointInPath(coordinate[0], coordinate[1]) ) {
+                        shapeUids.push( shape.uid );
+                    }
+                }
             }
         });
 
+        if( coordinate ) {
+            this.markEvent.emit( shapeUids );
+        }
 
     }
 
