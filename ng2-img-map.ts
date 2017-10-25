@@ -333,7 +333,7 @@ export class ImgMapComponent {
             if ( shape.pixels.length > 2 ) {
                 context.imageSmoothingEnabled = true;
                 context.beginPath();
-                context.strokeStyle = this.lineColor;
+                context.strokeStyle = shape.lineColor;
                 var pointAx = shape.pixels[0][0];
                 var pointAy = shape.pixels[0][1];
                 context.moveTo(pointAx, pointAy);
@@ -346,8 +346,8 @@ export class ImgMapComponent {
                     //context.stroke();
                 }
                 // Finally, fill the context
-                if( this.fillClosedPath ) {
-                    context.fillStyle = this.fillColorForClosedPath;
+                if( shape.fill ) {
+                    context.fillStyle = shape.fillColor;
                     context.fill();
                 }
                 context.stroke();
